@@ -1,2 +1,2 @@
-# aws-ingest-template
-Basic ingest template for running ingest pipelines via AWS lambda.
+# ingest-template-aws
+Basic ingest template for running ingest pipelines via an AWS lambda function.
