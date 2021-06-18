@@ -1,12 +1,11 @@
-import logging
+import json
 import os
+from pipelines.runner import run_pipeline
 from typing import Dict
 from urllib.parse import unquote_plus
 
 from tsdat.io import S3Path
-from pipelines.runner import run_pipeline
-
-logger = logging.getLogger()
+from pipelines.utils.log_helper import logger, log_exception
 
 
 def get_s3_path(record: Dict):
@@ -69,11 +68,13 @@ def lambda_handler(event, context):
     # Configure the root logger
     logger.setLevel(os.environ['LOG_LEVEL'])
 
-    logger.info('Invoking pipeline')
-    logger.info('## ENVIRONMENT VARIABLES')
-    logger.info(os.environ)
-    logger.info('## EVENT')
-    logger.info(event)
+    # We combine all the request information into a single json object so it's easier to read in the CloudWatch logs!
+    debug_info = json.dumps({
+        "message": "Invoking lambda function",
+        "environment": dict(os.environ),
+        "event": event
+    })
+    logger.info(debug_info)
 
     try:
         input_files = []
@@ -88,7 +89,9 @@ def lambda_handler(event, context):
         run_pipeline(input_files=input_files)
 
     except Exception as e:
-        logger.exception("Failed to run pipeline - Exception Details:")
+        # This is only to catch for exceptions that happen outside the pipeline
+        # as the pipeline runner will catch any pipeline exceptions.
+        log_exception("Failed to invoke lambda function.")
 
 
 

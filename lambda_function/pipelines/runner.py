@@ -1,18 +1,20 @@
 
+import importlib
+import traceback
+
+import json
 import os
 import re
-import importlib
-import logging
+import sys
+from pipelines.utils.log_helper import logger
 from typing import List, Union
 
 from tsdat.io import S3Path
 
-logger = logging.getLogger()
-
 pipeline_map = {
     'a2e_waves_ingest': re.compile('.*waves\\.csv'),
-    'a2e_imu_ingest':   re.compile('.*\\.bin'),
-    'a2e_lidar_ingest': re.compile('.*\\.sta'),
+    'a2e_imu_ingest':   re.compile('.*\\.imu\\.bin'),
+    'a2e_lidar_ingest': re.compile('.*\\.sta\\.7z'),
     'a2e_buoy_ingest': re.compile('buoy\\..*\\.(?:csv|zip|tar|tar\\.gz)')
 }
 
@@ -29,6 +31,26 @@ def instantiate_pipeline(pipeline_dir, pipeline_config, storage_config):
     class_ = getattr(module, 'Pipeline')
     instance = class_(pipeline_config, storage_config)
     return instance
+
+
+def get_log_message(pipeline_state, pipeline_name, location, input_files, exception=False):
+
+    log_msg = {
+        "Pipeline_Name": pipeline_name,
+        "State": pipeline_state,
+        "Location": location,
+        "Input_Files": input_files
+    }
+
+    if exception:
+        exception_type, exception_value, exception_traceback = sys.exc_info()
+        traceback_string = traceback.format_exception(exception_type, exception_value, exception_traceback)
+        log_msg["Error_Type"] = exception_type.__name__
+        log_msg["Exception_Message"] = str(exception_value)
+        log_msg["Stack_Trace"] = traceback_string
+
+    return json.dumps(log_msg)
+
 
 
 def run_pipeline(input_files: Union[List[S3Path], List[str]] = []):
@@ -63,13 +85,13 @@ def run_pipeline(input_files: Union[List[S3Path], List[str]] = []):
     file_path = input_files[0].__str__()
     query_file = os.path.basename(file_path)
 
+    logger.debug(f"Dynamically determining pipeline to use from input file: {query_file}")
+
     # Get the storage config file
     pipelines_dir = os.path.dirname(os.path.realpath(__file__))
     storage_config = os.path.join(pipelines_dir, 'config/storage_config.yml')
 
     # Look up the correct location for the given data file
-    logger.debug('Dynamically determining pipeline configuration to use')
-    logger.debug(f'Parsing variables from file name: {query_file}')
     location = None
     for location_key, file_pattern in location_map.items():
         if file_pattern.match(query_file):
@@ -83,25 +105,23 @@ def run_pipeline(input_files: Union[List[S3Path], List[str]] = []):
             pipeline_dir = pipeline_key
             break
 
-    logger.debug(f'pipelines_dir = {pipelines_dir}')
-    logger.debug(f'pipeline_dir = {pipeline_dir}')
-    logger.debug(f'location = {location}')
-
     # If no pipeline is registered for this file, then skip it
     if location is None or pipeline_dir is None:
-        logger.debug(f'Skipping file {query_file} since no pipeline is registered for this file pattern.')
+        logger.info(f'Skipping files: {input_files} since no pipeline is registered for file pattern: {query_file}.')
 
     else:
-        # Look up the correct pipeline config file
+        # Look up the correct pipeline config file and instantiate pipeline
         pipeline_config = os.path.join(pipelines_dir, pipeline_dir, 'config', f'pipeline_config_{location}.yml')
-
-        # Create and run pipeline
-        logger.info(f'Creating pipeline')
-        logger.debug(f'pipeline_config = {pipeline_config}')
-        logger.debug(f'storage_config = {storage_config}')
-        retain_input_files = os.environ['RETAIN_INPUT_FILES']
-        logger.debug(f'retain_input_files = {retain_input_files}')
         pipeline = instantiate_pipeline(pipeline_dir, pipeline_config, storage_config)
 
-        logger.info('Running pipeline...')
-        pipeline.run(input_files)
+        try:
+            # Run Pipeline
+            logger.info(get_log_message('Start', pipeline_dir, location, input_files))
+            pipeline.run(input_files)
+            logger.info(get_log_message('Success', pipeline_dir, location, input_files))
+
+        except Exception as e:
+            logger.error(get_log_message('Error', pipeline_dir, location, input_files, exception=True))
+
+
+

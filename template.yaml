@@ -1,5 +1,8 @@
 #-------------------------------------------------------------------
-# This is the SAM template for deploying a lambda function to AWS.
+# This is the SAM template for deploying a Cloud Formation Stack to AWS.
+#
+# -----> NOTE:  The stack name is specified when you do "sam deploy --guided"
+#
 # The sam deploy command converts it over to a cloud formation template.
 # You can find the files that will be deployed to AWS in the .aws-sam
 # folder
@@ -10,43 +13,61 @@
 # For details on the AWS::Serverless::Function properties, see:
 # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
 #-------------------------------------------------------------------
+
+######################################################################
+# MODIFYING THIS TEMPLATE
+#
+# For basic usage, you should only need to modify 3 things when you
+# create a new template:
+#     1) the name of the lambda function
+#     2) the name of the input S3 bucket
+#     3) the name of the output S3 bucket
+#
+# ----->  NOTE:  Search for #<==== in this document to identify these fields.
+#
+# For more advanced changes (such as changing the input event triggers),
+# see an AWS specialist.
+######################################################################
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  a2e-tsdat pipelines
-  This function runs a2e tsdat data processing
-  pipelines on aws.  Inputs are provided via s3
-  bucket events.  Outputs are written to output
-  s3 bucket which serves as the storage root.
+  This template deployes an AWS stack that contains the following resources:
+  1) A Lambda function to run one or more tsdat ingest pipelines
+  2) An S3 input bucket where incoming raw files should be placed.
+     All files placed in the input bucket will trigger the pipeline.
+  3) An S3 output bucket where the tsdat processed data will be stored.
 
 # SAM CLI will prompt for these parameters when you do a "sam deploy --guided"
+# so that you can override them.
 # These parameters will be passed to the lambda function via environment
 # variables, which will be used to specify the storage configuration for
 # tsdat pipelines.
 Parameters:
-  # The source bucket where file inputs will be placed
+  # The source/input bucket where raw files will be placed
   SourceBucket:
     Type: String
-    Default: "a2e-tsdat-pipeline-inputs"
+    Default: "tsdat-pipeline-inputs"  #<==== Change this if you want your input bucket to be named differently
 
-  # The destination bucket where pipeline outputs will be placed
+  # The destination bucket where tsdat pipeline outputs will be placed
   DestinationBucket:
     Type: String
-    Default: "a2e-tsdat-pipeline-outputs"
+    Default: "tsdat-pipeline-outputs"  #<==== Change this if you want your output bucket to be named differently
 
   # The logging level to use
   LoggingLevel:
     Type: String
     Default: INFO
 
-
+# This section describes the three AWS resources that will be created from this template.
 Resources:
-  A2ETsdatPipelines:
+
+  # 1) Lambda Function
+  LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      FunctionName: a2e-tsdat-pipelines
-      Description: Lambda function to run a2e tsdat pipelines from s3 trigger
+      FunctionName: tsdat-pipeline-lambda  #<==== Change this if you want your lambda function to be named differently
+      Description: Lambda function to run tsdat pipelines from s3 trigger
       Environment:
         Variables:
           STORAGE_BUCKET: !Ref DestinationBucket
@@ -70,20 +91,23 @@ Resources:
       DockerContext: ./lambda_function
       DockerTag: python3.8-v1
 
+  # 2) Input S3 Bucket
   SourceS3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Ref SourceBucket
 
+  # 3) Output S3 Bucket
   DestinationS3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Ref DestinationBucket
 
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  TsdatPipeline:
-    Description: "a2e/tsdat Pipelines Function ARN"
-    Value: !GetAtt A2ETsdatPipelines.Arn
+  # The optional Outputs section is used to specify the properties to return whenever you view your stack's properties
+  # via the AWS CLI: "aws cloudformation describe-stacks"
+  # In this case, we make sure that we show the Amazon Resource Name (ARN) for the generated Lambda Function so it
+  # is easy to find.  ARNs are used by Amazon to uniquely identify each resource
+  LambdaFunction:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt LambdaFunction.Arn
