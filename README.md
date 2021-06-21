@@ -208,11 +208,11 @@ You may also want to test your pipeline locally by running inside the same lambd
 To do this, you will need to have Docker installed on your machine.  Follow these steps to run your lambda container locally:
 
 1. Upload the file you want to test to a test S3 bucket.
-2. Create a json event for your test file and put it under the tests/events folder for the appropriate pipeline and location.  See `tests/events/a2e_imu_ingest/morro/s3-event.json` as an example.  You will need to change the S3 bucket name and S3 key to point to the correct file.
+2. Create a json event for your test file and put it under the tests/events folder for the appropriate pipeline and location.  See `tests/events/a2e_buoy_ingest/morro/s3-event.json` as an example.  You will need to change the S3 bucket name and S3 key to point to the correct file.
 3. Use SAM to build and run the pipeline:
     ```bash
     sam build 
-    sam local invoke tsdat-pipeline-lambda --event tests/events/a2e_imu_ingest/morro/s3-event.json 
+    sam local invoke tsdat-pipeline-lambda --event tests/events/a2e_buoy_ingest/morro/s3-event.json 
     ```
 
 ## Cleanup

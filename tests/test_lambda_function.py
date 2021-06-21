@@ -38,18 +38,6 @@ class TestPipeline(unittest.TestCase):
         self.run_pipeline('a2e_buoy_ingest', 'humboldt')
         self.run_pipeline('a2e_buoy_ingest', 'morro')
 
-    def test_imu(self):
-        self.run_pipeline('a2e_imu_ingest', 'humboldt')
-        self.run_pipeline('a2e_imu_ingest', 'morro')
-
-    def test_lidar(self):
-        self.run_pipeline('a2e_lidar_ingest', 'humboldt')
-        self.run_pipeline('a2e_lidar_ingest', 'morro')
-
-    def test_waves(self):
-        self.run_pipeline('a2e_waves_ingest', 'humboldt')
-        self.run_pipeline('a2e_waves_ingest', 'morro')
-
 
 if __name__ == '__main__':
     unittest.main()

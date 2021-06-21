@@ -11,12 +11,6 @@ storage:
       csv:
         file_pattern: '.*\.csv'
         classname: tsdat.io.filehandlers.CsvHandler
-      imu:
-        file_pattern: '.*\.bin'
-        classname: pipelines.a2e_imu_ingest.filehandlers.ImuFileHandler
-      sta:
-        file_pattern: '.*\.sta'
-        classname: pipelines.a2e_lidar_ingest.filehandlers.StaFileHandler
 
     output:
       netcdf:

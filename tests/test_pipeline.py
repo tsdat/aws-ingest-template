@@ -30,18 +30,6 @@ class TestPipeline(unittest.TestCase):
         run_pipeline([os.path.join(data_dir, 'a2e_buoy_ingest/humboldt/buoy.z05.00.20201201.000000.zip')])
         run_pipeline([os.path.join(data_dir, 'a2e_buoy_ingest/morro/buoy.z06.00.20201201.000000.zip')])
 
-    def test_imu(self):
-        run_pipeline([os.path.join(data_dir, 'a2e_imu_ingest/humboldt/buoy.z05.00.20201201.000000.imu.bin')])
-        run_pipeline([os.path.join(data_dir, 'a2e_imu_ingest/morro/buoy.z06.00.20201201.000000.imu.bin')])
-
-    def test_lidar(self):
-        run_pipeline([os.path.join(data_dir, 'a2e_lidar_ingest/humboldt/lidar.z05.00.20201201.000000.sta')])
-        run_pipeline([os.path.join(data_dir, 'a2e_lidar_ingest/morro/lidar.z06.00.20201201.000000.sta')])
-
-    def test_waves(self):
-        run_pipeline([os.path.join(data_dir, 'a2e_waves_ingest/humboldt/buoy.z05.00.20201201.000000.waves.csv')])
-        run_pipeline([os.path.join(data_dir, 'a2e_waves_ingest/morro/buoy.z06.00.20201201.000000.waves.csv')])
-
 
 if __name__ == '__main__':
     unittest.main()
