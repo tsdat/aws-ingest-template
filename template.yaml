@@ -14,20 +14,6 @@
 # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
 #-------------------------------------------------------------------
 
-######################################################################
-# MODIFYING THIS TEMPLATE
-#
-# For basic usage, you should only need to modify 3 things when you
-# create a new template:
-#     1) the name of the lambda function
-#     2) the name of the input S3 bucket
-#     3) the name of the output S3 bucket
-#
-# ----->  NOTE:  Search for #<==== in this document to identify these fields.
-#
-# For more advanced changes (such as changing the input event triggers),
-# see an AWS specialist.
-######################################################################
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
@@ -37,26 +23,49 @@ Description: >
      All files placed in the input bucket will trigger the pipeline.
   3) An S3 output bucket where the tsdat processed data will be stored.
 
+######################################################################
+# PARAMETERS (modify this section for general use)
+#
+# For basic usage, you should only need to modify 3 parameters when you
+# create a new template:
+#     1) the name of the lambda function
+#     2) the name of the input S3 bucket
+#     3) the name of the output S3 bucket
+#
 # SAM CLI will prompt for these parameters when you do a "sam deploy --guided"
 # so that you can override them.
 # These parameters will be passed to the lambda function via environment
 # variables, which will be used to specify the storage configuration for
 # tsdat pipelines.
+#
+# ----->  NOTE:  Search for #<==== in this document to identify these parameters.
+#
+# For more advanced changes (such as changing the input event triggers),
+# see an AWS specialist.
+######################################################################
 Parameters:
   # The source/input bucket where raw files will be placed
-  SourceBucket:
+  SourceBucketName:
     Type: String
     Default: "tsdat-pipeline-inputs"  #<==== Change this if you want your input bucket to be named differently
 
   # The destination bucket where tsdat pipeline outputs will be placed
-  DestinationBucket:
+  DestinationBucketName:
     Type: String
     Default: "tsdat-pipeline-outputs"  #<==== Change this if you want your output bucket to be named differently
+
+  LambdaFunctionName:
+    Type: String
+    Default: "tsdat-pipeline-lambda"   #<==== Change this if you want your lambda function to be named differently
 
   # The logging level to use
   LoggingLevel:
     Type: String
     Default: INFO
+
+######################################################################
+# STACK RESOURCES (advanced users only)
+######################################################################
 
 # This section describes the three AWS resources that will be created from this template.
 Resources:
@@ -66,19 +75,19 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      FunctionName: tsdat-pipeline-lambda  #<==== Change this if you want your lambda function to be named differently
+      FunctionName: !Ref LambdaFunctionName
       Description: Lambda function to run tsdat pipelines from s3 trigger
       Environment:
         Variables:
-          STORAGE_BUCKET: !Ref DestinationBucket
+          STORAGE_BUCKET: !Ref DestinationBucketName
           LOG_LEVEL: !Ref LoggingLevel
       Timeout: 900  # Longest allowable lambda timeout is 15 min or 900 s
       MemorySize: 10240  # Largest allowable memory is 10GB (specified in MB)
       Policies:
         - S3CrudPolicy:
-            BucketName: !Sub "${SourceBucket}"
+            BucketName: !Sub "${SourceBucketName}"
         - S3CrudPolicy:
-            BucketName: !Sub "${DestinationBucket}"
+            BucketName: !Sub "${DestinationBucketName}"
         - AWSLambdaBasicExecutionRole
       Events:
         FileUploaded:
@@ -95,13 +104,13 @@ Resources:
   SourceS3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Ref SourceBucket
+      BucketName: !Ref SourceBucketName
 
   # 3) Output S3 Bucket
   DestinationS3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Ref DestinationBucket
+      BucketName: !Ref DestinationBucketName
 
 Outputs:
   # The optional Outputs section is used to specify the properties to return whenever you view your stack's properties
