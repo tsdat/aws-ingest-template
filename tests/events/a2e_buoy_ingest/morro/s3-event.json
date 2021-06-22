@@ -7,7 +7,7 @@
       "eventTime": "2021-04-08T01:56:40.986Z",
       "eventName": "ObjectCreated:Put",
       "userIdentity": {
-        "principalId": "AWS:AROAU3ALBJQYWMD5KLGF2:Carina.Lansing@pnnl.gov"
+        "principalId": "AWS:AROAU3ALBJQYWMD5KFOO2:Jane.Doe@gmail.com"
       },
       "requestParameters": {
         "sourceIPAddress": "130.20.174.128"

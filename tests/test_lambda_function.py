@@ -24,6 +24,7 @@ class TestPipeline(unittest.TestCase):
         os.environ['STORAGE_CLASSNAME'] = 'tsdat.io.AwsStorage'
         os.environ['RETAIN_INPUT_FILES'] = 'True'
         os.environ['STORAGE_BUCKET'] = 'a2e-tsdat-test-output'
+        # os.environ['AWS_PROFILE'] = 'your-aws-profile'  # If using SSO to authenticate aws CLI.
 
     def tearDown(self) -> None:
         super().tearDown()
