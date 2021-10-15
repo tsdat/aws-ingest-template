@@ -59,17 +59,37 @@ location_map = {
 }
 ```
 
-For example: 
+Example 1: 
 
 ```python
+# For data from multiple 'locations':
 
 pipeline_map = {
+    # Specify general file naming convention
     'a2e_buoy_ingest': re.compile('buoy\\..*\\.(?:csv|zip|tar|tar\\.gz)')
 }
 
 location_map = {
+    # Specify local file attribute
     'humboldt': re.compile('.*\\.z05\\..*'),
     'morro'   : re.compile('.*\\.z06\\..*')
+}
+```
+
+Example 2:
+
+```python
+# For data from one 'location':
+# (input filename format here is 'tide_YYYYDDMMhhmmss.log')
+
+pipeline_map = {
+    # General regex file structure
+    'tide_data_ingest': re.compile('tide_\d{14}.log'),
+}
+
+location_map = {
+    # Local can be same as general
+    'mcrl': re.compile('tide_\d{14}.log'),
 }
 ```
 
@@ -77,7 +97,7 @@ location_map = {
 
 * **Rename your pipeline code folder**
 
-  Under the **`lambda_function/pipelines`** folder, rename the a2e_buoy_ingest to your PIPELINE_NAME. *(If you have more than one pipelines you are deploying, you may need to make one ore more copies of the a2e_buoy_ingest folder.)*
+  Under the **`lambda_function/pipelines`** folder, rename the a2e_buoy_ingest to your PIPELINE_NAME. *(Make and rename a copy of the a2e_buoy_ingest folder for every pipeline being deployed.)*
 
 * **Rename your config files**
 
@@ -93,16 +113,35 @@ location_map = {
   ```
 
   You can rename the existing files to match your LOCATION(s) or you can create a new file as needed.
-
-* **Configure your pipeline's file handlers**
-
-  Update the **`lambda_function/pipelines/config/storage_config.yml`** file to specify the file handlers required for your pipeline. 
-
+  
 * **Configure your pipeline's code**
 
   Edit the **`lambda_function/pipelines/PIPELINE_NAME/pipeline.py`** file with the correct code for your ingest pipeline.
 
   TODO: add a link to tsdat's readthedocs for more info on setting up pipeline code and config files...
+
+* **Configure your pipeline's file handlers**
+
+  If needed, add custom `filehandlers.py` to the **`lambda_function/pipelines/PIPELINE_NAME/`** folder. See the `tsdat/examples/` folder for example custom file handlers or `tsdat-template-local/pipeline/filehanders.py` for a dummy file handler template.
+
+  Update the **`lambda_function/pipelines/config/storage_config.yml`** file to specify the file handlers required for your pipeline.
+  
+    ```bash
+    file_handlers:
+      inputs:
+        <ext>:
+          file_pattern: '.*\.<ext>'
+          classname: pipelines.PIPELINE_NAME.filehandlers.<CustomFileHandler>
+  ```
+  For example:
+
+    ```bash
+    file_handlers:
+      input:
+        csv:
+          file_pattern: '.*\.csv'
+          classname: tsdat.io.filehandlers.CsvHandler
+    ```
 
 
 ## **Configuring your unit tests**
@@ -127,7 +166,7 @@ For example:
 $ python tests/test_pipeline.py
 ```
 **Please follow the Code Tour located at XXXX to learn how to interactively debug your pipeline with VSCode.**
-
+TODO: XXXX
 .
 
 # **Deploying your pipeline(s) to AWS**
