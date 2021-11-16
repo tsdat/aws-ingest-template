@@ -210,10 +210,12 @@ venv.bak/
 
 ### VisualStudioCode ###
 .vscode/*
+!.vscode/.env
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/docstring.mustache
 .history
 
 ### Windows ###

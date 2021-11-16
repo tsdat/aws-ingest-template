@@ -1,0 +1,24 @@
+{
+    "autoDocstring.customTemplatePath": ".vscode/docstring.mustache",
+    "editor.formatOnSave": true,
+    "python.envFile": "${workspaceFolder}/.vscode/.env",
+    "python.formatting.provider": "black",
+    "python.linting.flake8Args": [
+        "--exclude",
+        "templates/**"
+    ],
+    "python.linting.flake8Enabled": true,
+    "python.linting.lintOnSave": true,
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH": "${PYTHONPATH}:${workspaceFolder}"
+    },
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${PYTHONPATH}:${workspaceFolder}"
+    },
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${PYTHONPATH}:${workspaceFolder}"
+    },
+    "todo-tree.filtering.excludeGlobs": [
+        "**/templates/**", // Prevent template TODOs from polluting developer workspace
+    ]
+}
