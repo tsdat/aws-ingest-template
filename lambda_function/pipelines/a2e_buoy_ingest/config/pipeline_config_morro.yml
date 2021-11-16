@@ -64,7 +64,6 @@ dataset_definition:  # Describes the dataset that will be produced
         file_pattern: "conductivity"
         name: Surface Temperature (C)
         units: degC
-        # required: true  # TODO: Add this optional attribute to indicate that this variable must be retrieved
       dims: [time]
       type: double
       attrs:

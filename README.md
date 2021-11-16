@@ -94,6 +94,8 @@ location_map = {
 
   You can rename the existing files to match your LOCATION(s) or you can create a new file as needed.
 
+  For more information on tsdat's configuration files see our documentation on customizing [Configuration Files](https://tsdat.readthedocs.io/en/latest/configuring_tsdat.html#configuration-files)
+
 * **Configure your pipeline's file handlers**
 
   Update the **`lambda_function/pipelines/config/storage_config.yml`** file to specify the file handlers required for your pipeline. 
@@ -102,7 +104,8 @@ location_map = {
 
   Edit the **`lambda_function/pipelines/PIPELINE_NAME/pipeline.py`** file with the correct code for your ingest pipeline.
 
-  TODO: add a link to tsdat's readthedocs for more info on setting up pipeline code and config files...
+  For more information on code customization you can apply in tsdat, please see our documentation on [Code Customizations](https://tsdat.readthedocs.io/en/latest/configuring_tsdat.html#code-customizations)
+
 
 
 ## **Configuring your unit tests**
