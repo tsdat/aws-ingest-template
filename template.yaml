@@ -67,7 +67,7 @@ Parameters:
 # STACK RESOURCES (advanced users only)
 ######################################################################
 
-# This section describes the three AWS resources that will be created from this template.
+# This section describes the AWS resources that will be created from this template.
 Resources:
 
   # 1) Lambda Function
@@ -111,6 +111,16 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Ref DestinationBucketName
+
+  # 4) Explicit permission for input bucket to trigger our lambda function
+  LambdaInvokePermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 's3.amazonaws.com'
+      SourceAccount: !Sub ${AWS::AccountId}
+      SourceArn: !GetAtt SourceS3Bucket.Arn
 
 Outputs:
   # The optional Outputs section is used to specify the properties to return whenever you view your stack's properties
